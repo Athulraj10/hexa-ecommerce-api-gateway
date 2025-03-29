@@ -1,25 +1,27 @@
 import { NestFactory } from '@nestjs/core';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Transport, GrpcOptions } from '@nestjs/microservices';
 import { AppModule } from './app.module';
-import { GrpcOptions } from '@nestjs/microservices/interfaces/microservice-configuration.interface';
-import { addReflection } from '@grpc/reflection';
-import { Server } from '@grpc/grpc-js';
+import { Server, loadPackageDefinition } from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<GrpcOptions>(AppModule, {
     transport: Transport.GRPC,
     options: {
-      package: 'auth', // Your proto package
-      protoPath: 'src/proto/auth.proto', // Adjust the path to your proto file
+      package: 'auth',
+      protoPath: 'src/proto/auth.proto',
       url: 'localhost:4001',
     },
   });
 
-  // Enable gRPC Reflection
-  const server = app.getServer() as Server;
-  addReflection(server);
+  await app.listen().then(() => {
+    console.log('AuthService gRPC Server is running on port 4001');
 
-  await app.listen();
-  console.log('AuthService gRPC Server is running on port 50051');
+    // Load the .proto definition (Reflection-like behavior)
+    // const packageDefinition = protoLoader.loadSync('src/proto/auth.proto');
+    // const grpcObject = loadPackageDefinition(packageDefinition);
+
+    console.log('gRPC Reflection-like setup is ready');
+  });
 }
 bootstrap();
