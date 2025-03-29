@@ -40,6 +40,8 @@ export class AuthController {
       const response = await lastValueFrom(this.authService.login(credentials));
       console.log({response})
       return response;
+
+      
     } catch (error) {
       console.log({error})
       throw new BadRequestException('Login failed');
