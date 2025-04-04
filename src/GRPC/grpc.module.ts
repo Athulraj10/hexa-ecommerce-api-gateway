@@ -13,7 +13,7 @@ import { AUTH_PACKAGE_NAME, AUTH_SERVICE_NAME } from '../proto/auth';
         options: {
           package: AUTH_PACKAGE_NAME,
           protoPath: join(__dirname, '../proto/auth.proto'),
-          url: 'localhost:4001', // Consistent port
+          url: '127.0.0.1:4001',
         },
       },
     ]),

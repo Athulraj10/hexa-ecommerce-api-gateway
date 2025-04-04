@@ -8,7 +8,7 @@ import { JwtStrategy } from './jwt/jwt.strategy';
 import { JwtAuthGuard } from './jwt/jwt-auth-guard';
 import { JwtConfigModule } from './jwt config/jwt.register.module';
 import { RabbitMQModule } from './rabbitMQ/rabbitmq.module';
-import { GRPCModule } from './GRPC.module';
+// import { GRPCModule } from './GRPC.module';
 import { AuthenticationController } from './authentication/authentication.controller';
 import { AuthModule } from './authentication/authentication.module';
 // import { GRPCModule } from './GRPC.module';
@@ -17,7 +17,6 @@ import { AuthModule } from './authentication/authentication.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     RabbitMQModule,
-    GRPCModule,
     JwtConfigModule,
     AuthModule
   ],
