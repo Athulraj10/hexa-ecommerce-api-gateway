@@ -3,39 +3,94 @@ import {
   UnauthorizedException,
   ForbiddenException,
   NotFoundException,
+  ConflictException,
+  GoneException,
+  PayloadTooLargeException,
+  UnsupportedMediaTypeException,
+  UnprocessableEntityException,
   InternalServerErrorException,
+  GatewayTimeoutException,
+  ServiceUnavailableException,
+  NotImplementedException,
 } from '@nestjs/common';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 
 export function grpcErrorHandler(error: any): never {
-  let details;
-
+  let parsedDetails: any = {};
   try {
-    details =
-      typeof error.details === 'string'
-        ? JSON.parse(error.details)
-        : error.details;
-  } catch (parseError) {
-    details = error.details;
+    parsedDetails = typeof error.details === 'string'
+      ? JSON.parse(error.details)
+      : error.details || { message: error.message || 'Unknown error occurred' };
+  } catch (e) {
+    console.error('Error parsing details:', e);
+    parsedDetails = {
+      message: error.details || error.message || 'Unknown error occurred'
+    };
   }
+
+  const message = parsedDetails.message || error.message || 'Internal Server Error';
+  const errors = parsedDetails.errors || parsedDetails;
+
+  let exception: any;
 
   switch (error.code) {
     case GrpcStatus.INVALID_ARGUMENT:
-      throw new BadRequestException({
-        message: 'INVALID_ARGUMENT',
-        errors: details, // Attach parsed details for better debugging
-      });
-
+    case GrpcStatus.FAILED_PRECONDITION:
+    case GrpcStatus.OUT_OF_RANGE:
+      exception = BadRequestException;
+      break;
     case GrpcStatus.UNAUTHENTICATED:
-      throw new UnauthorizedException(error.message);
-
+      exception = UnauthorizedException;
+      break;
     case GrpcStatus.PERMISSION_DENIED:
-      throw new ForbiddenException(error.message);
-
+      exception = ForbiddenException;
+      break;
     case GrpcStatus.NOT_FOUND:
-      throw new NotFoundException(error.message);
-
+      exception = NotFoundException;
+      break;
+    case GrpcStatus.ALREADY_EXISTS:
+    case GrpcStatus.ABORTED:
+      exception = ConflictException;
+      break;
+    case GrpcStatus.DATA_LOSS:
+      exception = GoneException;
+      break;
+    case GrpcStatus.RESOURCE_EXHAUSTED:
+      exception = PayloadTooLargeException;
+      break;
+    case GrpcStatus.CANCELLED:
+      exception = UnsupportedMediaTypeException;
+      break;
+    case GrpcStatus.UNIMPLEMENTED:
+      exception = UnprocessableEntityException;
+      break;
+    case GrpcStatus.UNKNOWN:
+    case GrpcStatus.INTERNAL:
+      exception = InternalServerErrorException;
+      break;
+    case GrpcStatus.DEADLINE_EXCEEDED:
+      exception = GatewayTimeoutException; // Prefer this over NotImplementedException
+      break;
+    case GrpcStatus.UNAVAILABLE:
+      exception = ServiceUnavailableException;
+      break;
     default:
-      throw new InternalServerErrorException('Internal Server Error');
+      exception = InternalServerErrorException;
   }
+
+  // Create an instance to retrieve status code
+  const httpException = new exception();
+  const statusCode = httpException.getStatus?.() || 500;
+
+  // Update the response with actual code
+  const response = {
+    data: null,
+    meta: {
+      code: statusCode,
+      message,
+      ...(Object.keys(errors).length > 0 && { errors })
+    }
+  };
+
+  throw new exception(response);
 }
