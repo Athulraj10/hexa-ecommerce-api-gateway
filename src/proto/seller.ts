@@ -10,13 +10,6 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "seller";
 
-/**
- * message DeleteProductResponse {
- *   bool success = 1;
- *   string message = 2;
- * }
- */
-
 export interface AddProductRequest {
   name: string;
   description: string;
