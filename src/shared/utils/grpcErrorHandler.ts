@@ -84,6 +84,7 @@ export function grpcErrorHandler(error: any): never {
 
   // Update the response with actual code
   const response = {
+    success:false,
     data: null,
     meta: {
       code: statusCode,

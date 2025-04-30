@@ -56,9 +56,9 @@ export class AuthenticationController implements OnModuleInit {
         console.log({ credentials });
         const response = await lastValueFrom(this.authService.login(credentials));
         console.log({ response });
-        return response;
+        return this.ResponseService.successResponseWithData((response));
       } catch (error) {
-        console.error('❌ gRPC Error:');
+        console.error('❌ gRPC Error:',error);
         grpcErrorHandler(error);
       }
     }
