@@ -14,6 +14,8 @@ import {
   LoginRequest,
   SignUpRequest,
   SuccessResponse,
+  RefreshTokenRequest,
+  AuthResponse,
 } from '../proto/auth';
 import { grpcErrorHandler } from 'src/shared/utils/grpcErrorHandler';
 import { ResponseService } from 'src/services/response';
@@ -78,17 +80,17 @@ export class AuthenticationController implements OnModuleInit {
   //   }
   // }
 
-  // @Post('refresh-token')
-  // async refreshToken(@Body() request: RefreshTokenRequest): Promise<AuthResponse> {
-  //   try {
-  //     this.logger.log(`Refresh token attempt`);
-  //     const response = await lastValueFrom(this.authService.refreshToken(request));
-  //     return response;
-  //   } catch (error) {
-  //     this.logger.error('Refresh token failed', error.stack);
-  //     throw new BadRequestException('Refresh token failed');
-  //   }
-  // }
+  @Post('refresh-token')
+  async refreshToken(@Body() request: RefreshTokenRequest): Promise<SuccessResponse> {
+    try {
+      this.logger.log(`Refresh token attempt`);
+      const response = await lastValueFrom(this.authService.refreshToken(request));
+      return this.ResponseService.successResponseWithData((response));
+    } catch (error) {
+      console.error('❌ gRPC Error:',error);
+      grpcErrorHandler(error);
+    }
+  }
 
   // @Post('reset-password')
   // @UseGuards(JwtAuthGuard, RolesGuard)
