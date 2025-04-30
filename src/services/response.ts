@@ -3,8 +3,13 @@ import MESSAGES from 'src/constants/response-messages';
 
 @Injectable()
 export class ResponseService {
-  successResponseWithData(data: any) {
-    return data;
+  successResponseWithData <T = any>(response: any) {
+    return {
+      success: response.success,
+      timestamp: response.timestamp,
+      data: JSON.parse(response.data.toString()) as T,
+      meta: response.meta,
+    };
   }
 
   errorResponseWithData(data: any, message = MESSAGES.responseMessages.error) {

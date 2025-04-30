@@ -4,63 +4,36 @@ import {
   Body,
   Inject,
   Logger,
-  BadRequestException,
-  UseGuards,
-  Request,
   OnModuleInit,
-  NotFoundException,
-  UnauthorizedException,
-  InternalServerErrorException,
-  ForbiddenException,
 } from '@nestjs/common';
-import { ClientGrpc, RpcException } from '@nestjs/microservices';
-import { lastValueFrom, Observable } from 'rxjs';
-import { JwtAuthGuard } from '../jwt/jwt-auth-guard';
-import { RolesGuard } from '../jwt/roles.guard';
-import { Roles } from '../decorators/roles.decorator';
+import { ClientGrpc } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 import {
   AuthServiceClient,
   AUTH_SERVICE_NAME,
-  AuthResponse,
   LoginRequest,
   SignUpRequest,
-  LogoutRequest,
-  LogoutResponse,
-  RefreshTokenRequest,
-  ResetPasswordRequest,
-  ResetPasswordResponse,
   SuccessResponse,
 } from '../proto/auth';
-import { status as GrpcStatus } from '@grpc/grpc-js';
-import { HandleGrpcErrors } from 'src/shared/decorators/grpc-error-handler.decorator';
-import { response } from 'express';
 import { grpcErrorHandler } from 'src/shared/utils/grpcErrorHandler';
+import { ResponseService } from 'src/services/response';
 
 @Controller('auth')
 export class AuthenticationController implements OnModuleInit {
   private readonly logger = new Logger(AuthenticationController.name);
   private authService: AuthServiceClient;
 
-  constructor(@Inject(AUTH_SERVICE_NAME) private readonly client: ClientGrpc) {}
+  constructor(@Inject(AUTH_SERVICE_NAME) 
+  private readonly client: ClientGrpc,
+  private readonly ResponseService: ResponseService
+
+) {}
 
   onModuleInit() {
     this.authService =
       this.client.getService<AuthServiceClient>(AUTH_SERVICE_NAME);
   }
-
-  @Post('login')
-  async login(@Body() credentials: LoginRequest): Promise<any> {
-    try {
-      console.log({ credentials });
-      const response = await lastValueFrom(this.authService.login(credentials));
-      console.log({ response });
-      return response;
-    } catch (error) {
-      console.error('❌ gRPC Error:');
-      grpcErrorHandler(error);
-    }
-  }
-
+  
   @Post('sign-up')
   async signup(@Body() credentials: SignUpRequest): Promise<SuccessResponse> {
     try {
@@ -69,15 +42,27 @@ export class AuthenticationController implements OnModuleInit {
       const response = await lastValueFrom(
         this.authService.signUp(credentials),
       );
-      console.log({response})
-
-      return response
+      
+      return this.ResponseService.successResponseWithData((response))
     } catch (error) {
       console.error('❌ gRPC Error:');
       grpcErrorHandler(error);
     }
   }
-
+  
+    @Post('login')
+    async login(@Body() credentials: LoginRequest): Promise<any> {
+      try {
+        console.log({ credentials });
+        const response = await lastValueFrom(this.authService.login(credentials));
+        console.log({ response });
+        return response;
+      } catch (error) {
+        console.error('❌ gRPC Error:');
+        grpcErrorHandler(error);
+      }
+    }
+  
   // @Post('logout')
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles('user')

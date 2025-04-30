@@ -18,7 +18,7 @@ import { AuthModule } from './authentication/authentication.module';
     ConfigModule.forRoot({ isGlobal: true }),
     RabbitMQModule,
     JwtConfigModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [AppController, AdminController],
   providers: [ResponseService, JwtStrategy, JwtAuthGuard],

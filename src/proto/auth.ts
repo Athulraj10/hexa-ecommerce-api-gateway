@@ -10,23 +10,6 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "auth";
 
-export interface Meta {
-  code: number;
-  message: string;
-  extras: { [key: string]: string };
-}
-
-export interface Meta_ExtrasEntry {
-  key: string;
-  value: string;
-}
-
-export interface GenericSuccessResponse {
-  success: boolean;
-  timestamp: string;
-  meta: Meta | undefined;
-}
-
 export interface LoginRequest {
   email: string;
   password: string;
