@@ -59,19 +59,18 @@ export class AuthenticationController implements OnModuleInit {
       grpcErrorHandler(error);
     }
   }
-}
 
-// @Post('sign-up')
-// async signup(@Body() credentials: SignUpRequest): Promise<AuthResponse> {
-//   try {
-//     this.logger.log(`Signup attempt for email: ${credentials.email}`);
-//     const response = await lastValueFrom(this.authService.signUp(credentials));
-//     return response;
-//   } catch (error) {
-//     this.logger.error(`Signup failed for email: ${credentials.email}`, error.stack);
-//     throw new BadRequestException('Signup failed');
-//   }
-// }
+@Post('sign-up')
+async signup(@Body() credentials: SignUpRequest): Promise<any> {
+  try {
+    this.logger.log(`Signup attempt for email: ${credentials.email}`);
+    const response = await lastValueFrom(this.authService.signUp(credentials));
+    return response;
+  } catch (error) {
+    this.logger.error(`Signup failed for email: ${credentials.email}`, error.stack);
+    throw new BadRequestException('Signup failed');
+  }
+}
 
 // @Post('logout')
 // @UseGuards(JwtAuthGuard, RolesGuard)
@@ -118,4 +117,4 @@ export class AuthenticationController implements OnModuleInit {
 //     this.logger.error(`Password reset failed for user ID: ${req.user.data.id}`, error.stack);
 //     throw new BadRequestException('Reset password failed');
 //   }
-// }
+}
